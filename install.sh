@@ -69,6 +69,13 @@ mv "$FOLDER/$JOB.plist" "$HOME/Library/LaunchAgents"
 # Generally launchd load these jobs on login but you can load it manually
 launchctl load "$HOME/Library/LaunchAgents/$JOB.plist"
 
+if ! command -v sqlite3 &> /dev/null
+then
+    echo "Warning: We were not able to set Desktop Wallpaper systematically, please perform final step to complete installation - https://github.com/sakiv/bing-wallpaper-mac#set-desktop-wallpaper"
+else
+    sqlite3 "$HOME/Library/Application\ Support/Dock/desktoppicture.db" "update data set value='$HOME/Pictures/Bing-Wallpapers'"
+fi
+
 # Show the status of the job
 # launchctl list | grep "$JOB"
 

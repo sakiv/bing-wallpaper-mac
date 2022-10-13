@@ -5,7 +5,7 @@ This application can be used to change and refresh your Mac desktop wallpaper ev
 ## Installation
 ---
 You can deploy this application either using installation script (recommended) or manually.
-* ### Installation Script
+* ### Installing with script
 
     You can install the script using the following command. Copy this command and paste it on your Mac terminal.
 
@@ -13,7 +13,12 @@ You can deploy this application either using installation script (recommended) o
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/sakiv/bing-wallpaper-mac/dev/install.sh?`date '+%s'`)"
     ```
 
-* ### Manual Steps
+    If you get below warning, then just to troubleshooting section - [Desktop wallpaper not changing](#set-desktop-wallpaper)
+    ```bash
+    Warning: We were not able to set Desktop Wallpaper systematically, please perform final step to complete installation
+    ```
+
+* ### Installing manually
     *Note: You have to follow these steps in sequence. If you miss any one of these steps then application may not work as expected.* 
 
     * Download latest compressed file, i.e. `bing-wallpaper-mac.tar.gz`, from the [releases](https://github.com/sakiv/bing-wallpaper-mac/releases) page.
@@ -67,23 +72,46 @@ You can deploy this application either using installation script (recommended) o
         -	0	com.johndoe.bing-wallpaper
         ```
         *Note: If registration did not go thru successfully then you will see empty output*
+
+## Post Installation Steps
+---
+Now as you have deployed the application, it needs to be updated in System Preferences. Check section [Set desktop wallpaper manually](#set-desktop-wallpaper)
+
+
+
 ## Troubleshooting
 ---
 Sometimes things can go wrong, we have tried to list down possible failure scenarios and how to fix them.
 
-* Application not registered with Mac OS
-    ```
-    Unload failed: 5: Input/output error
-    Try running `launchctl bootout` as root for richer errors.
-    ```
-    Run following to verify that application is registered with Mac OS or not
-    ```bash
-    launchctl list | grep com.johndoe.bing-wallpaper
-    ```
-    If you get empty response then run following command to register application
-    ```bash
-    launchctl load ~/Library/LaunchAgents/com.johndoe.bing-wallpaper.plist
-    ```
+<a name="set-desktop-wallpaper"></a>
+<details open>
+<summary>Desktop wallpaper not changing</summary>
+
+* Navigate to System Preferences by clicking Apple icon on top-right of your screen and then click on `System Preferences`
+* Click on `Desktop & Screen Saver`
+* Add folder by clicking on `+` sign and navigating to `$HOME/Pictures/Bing-Wallpapers`
+![System Preferences -> Desktop & Screen Saver](assets/images/system-preferences-add-folder.png)
+    *Note: You should select the folder and not the individual file*
+
+</details>
+
+<details open>
+<summary>Application not registered with Mac OS</summary>
+
+```
+Unload failed: 5: Input/output error
+Try running `launchctl bootout` as root for richer errors.
+```
+Run following to verify that application is registered with Mac OS or not
+```bash
+launchctl list | grep com.johndoe.bing-wallpaper
+```
+If you get empty response then run following command to register application
+```bash
+launchctl load ~/Library/LaunchAgents/com.johndoe.bing-wallpaper.plist
+```
+
+</details>
 
 ## License
 ---
