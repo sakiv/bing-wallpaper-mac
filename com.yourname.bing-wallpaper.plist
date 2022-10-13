@@ -2,12 +2,12 @@
 <plist version="1.0">
 <dict>
    <key>Label</key>
-   <string>com.yourname.bing-wallpaper</string>
+   <string>com.{YOUR-NAME}.bing-wallpaper</string>
    <key>ProgramArguments</key>
    <array>
       <string>/bin/bash</string>
       <string>-c</string>
-      <string>$HOME/bing-wallpaper-mac/bing-wallpaper.sh</string>
+      <string>{TARGET-FOLDER}/bing-wallpaper.sh</string>
    </array>
    <key>LowPriorityIO</key>
    <true/>
