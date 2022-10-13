@@ -10,7 +10,7 @@ You can deploy this application either using installation script (recommended) o
     You can install the script using the following command. Copy this command and paste it on your Mac terminal.
 
     ```bash
-    $ sh -c "$(curl -fsSL https://raw.githubusercontent.com/sakiv/bing-wallpaper-mac/dev/install.sh?`date '+%s'`)"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/sakiv/bing-wallpaper-mac/dev/install.sh?`date '+%s'`)"
     ```
 
 * ### Manual Steps
@@ -19,13 +19,15 @@ You can deploy this application either using installation script (recommended) o
     * Download latest compressed file, i.e. `bing-wallpaper-mac.tar.gz`, from the [releases](https://github.com/sakiv/bing-wallpaper-mac/releases) page.
     * Extract file either by double clicking on it or using following command on terminal (assuming you have downloaded the file in your home directory - $HOME or ~)
         ```bash
-        $ tar -xvf ~/bing-wallpaper-mac.tar.gz -C ~/bing-wallpaper-mac
-        # Sample output
-        # x ./
-        # x ./LICENSE
-        # x ./README.md
-        # x ./com.yourname.bing-wallpaper.plist
-        # x ./bing-wallpaper.sh
+        tar -xvf ~/bing-wallpaper-mac.tar.gz -C ~/bing-wallpaper-mac
+        ```
+        Expected output
+        ```
+        x ./
+        x ./LICENSE
+        x ./README.md
+        x ./com.yourname.bing-wallpaper.plist
+        x ./bing-wallpaper.sh
         ```
     * After extracting files, you should see the following files
         ```
@@ -36,8 +38,7 @@ You can deploy this application either using installation script (recommended) o
         ```
     * Rename `com.yourname.bing-wallpaper.plist` file to appropriate name, for example - `com.johndoe.bing-wallpaper.plist`
         ```bash
-        $ mv ~/bing-wallpaper-mac/com.yourname.bing-wallpaper.plist ~/bing-wallpaper-mac/com.johndoe.bing-wallpaper.plist
-        # Empty output
+        mv ~/bing-wallpaper-mac/com.yourname.bing-wallpaper.plist ~/bing-wallpaper-mac/com.johndoe.bing-wallpaper.plist
         ```
     * Now open `com.johndoe.bing-wallpaper.plist` file in an editor of your choice, and replace the following lines with appropriate values
         ```xml
@@ -51,36 +52,36 @@ You can deploy this application either using installation script (recommended) o
         ```
     * Move newly renamed file `com.johndoe.bing-wallpaper.plist` to `~/Library/LaunchAgents` folder
         ```bash
-        $ mv ~/bing-wallpaper-mac/com.johndoe.bing-wallpaper.plist ~/Library/LaunchAgents/
-        # Empty output
+        mv ~/bing-wallpaper-mac/com.johndoe.bing-wallpaper.plist ~/Library/LaunchAgents/
         ```
     * Run the following command on terminal to register the script with Mac OS
         ```bash
-        $ launchctl load ~/Library/LaunchAgents/com.johndoe.bing-wallpaper.plist
-        # Empty output
+        launchctl load ~/Library/LaunchAgents/com.johndoe.bing-wallpaper.plist
         ```
     * To verify that script is successfully registered with Mac OS, run the following command on the terminal
         ```bash
-        $ launchctl list | grep com.johndoe.bing-wallpaper
-        
-        # Successful output
+        launchctl list | grep com.johndoe.bing-wallpaper
+        ```
+        Expected output.         
+        ```        
         -	0	com.johndoe.bing-wallpaper
-
-        # If it did not register successfully then you will see empty output
-
+        ```
+        *Note: If registration did not go thru successfully then you will see empty output*
 ## Troubleshooting
 ---
 Sometimes things can go wrong, we have tried to list down possible failure scenarios and how to fix them.
 
 * Application not registered with Mac OS
-    ```bash
+    ```
     Unload failed: 5: Input/output error
     Try running `launchctl bootout` as root for richer errors.
-    
-    # Run following to verify that application is registered with Mac OS or not
+    ```
+    Run following to verify that application is registered with Mac OS or not
+    ```bash
     launchctl list | grep com.johndoe.bing-wallpaper
-
-    # If you get empty response then run following command to register application
+    ```
+    If you get empty response then run following command to register application
+    ```bash
     launchctl load ~/Library/LaunchAgents/com.johndoe.bing-wallpaper.plist
     ```
 
