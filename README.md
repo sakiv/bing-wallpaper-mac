@@ -83,36 +83,35 @@ Now as you have deployed the application, it needs to be updated in System Prefe
 ---
 Sometimes things can go wrong, we have tried to list down possible failure scenarios and how to fix them.
 
-* <a name="set-desktop-wallpaper"></a>
-    <details>
-    <summary>Desktop wallpaper not changing</summary>
+<a name="set-desktop-wallpaper"></a>
+<details open>
+<summary>Desktop wallpaper not changing</summary>
 
-    * Navigate to System Preferences by clicking Apple icon on top-right of your screen and then click on `System Preferences`
-    * Click on `Desktop & Screen Saver`
-    * Add folder by clicking on `+` sign and navigating to `$HOME/Pictures/Bing-Wallpapers`
-    ![System Preferences -> Desktop & Screen Saver](assets/images/system-preferences-add-folder.png)
-        *Note: You should select the folder and not the individual file*
+* Navigate to System Preferences by clicking Apple icon on top-right of your screen and then click on `System Preferences`
+* Click on `Desktop & Screen Saver`
+* Add folder by clicking on `+` sign and navigating to `$HOME/Pictures/Bing-Wallpapers`
+![System Preferences -> Desktop & Screen Saver](assets/images/system-preferences-add-folder.png)
+    *Note: You should select the folder and not the individual file*
 
-    </details>
+</details>
 
-*
-    <details>
-    <summary>Application not registered with Mac OS</summary>
+<details open>
+<summary>Application not registered with Mac OS</summary>
 
-    ```
-    Unload failed: 5: Input/output error
-    Try running `launchctl bootout` as root for richer errors.
-    ```
-    Run following to verify that application is registered with Mac OS or not
-    ```bash
-    launchctl list | grep com.johndoe.bing-wallpaper
-    ```
-    If you get empty response then run following command to register application
-    ```bash
-    launchctl load ~/Library/LaunchAgents/com.johndoe.bing-wallpaper.plist
-    ```
+```
+Unload failed: 5: Input/output error
+Try running `launchctl bootout` as root for richer errors.
+```
+Run following to verify that application is registered with Mac OS or not
+```bash
+launchctl list | grep com.johndoe.bing-wallpaper
+```
+If you get empty response then run following command to register application
+```bash
+launchctl load ~/Library/LaunchAgents/com.johndoe.bing-wallpaper.plist
+```
 
-    </details>
+</details>
 
 ## License
 ---
