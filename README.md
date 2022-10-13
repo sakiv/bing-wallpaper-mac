@@ -113,6 +113,13 @@ launchctl load ~/Library/LaunchAgents/com.johndoe.bing-wallpaper.plist
 
 </details>
 
+## Manually packaging application
+---
+In scenarios where the application needs to be manually packaged, you can use the following command in root folder of source repository.
+```bash
+tar --exclude-vcs --exclude=".DS_Store" --exclude="assets" --exclude="*.tar.gz" --exclude="install.sh" -cvf bing-wallpaper-mac.tar.gz .
+```
+
 ## License
 ---
 This application is licensed under the MIT license.
