@@ -73,7 +73,17 @@ if ! command -v sqlite3 &> /dev/null
 then
     echo "Warning: We were not able to set Desktop Wallpaper systematically, please perform final step to complete installation - https://github.com/sakiv/bing-wallpaper-mac#set-desktop-wallpaper"
 else
-    sqlite3 "$HOME/Library/Application\ Support/Dock/desktoppicture.db" "update data set value='$HOME/Pictures/Bing-Wallpapers'"
+    query="insert into data select * from ("
+    query="${query} select ('~/Pictures/Bing-Wallpapers') as new_value"
+    query="${query} union"
+    query="${query} select ('3,600') as new_value"
+    query="${query} union"
+    query="${query} select ('0') as new_value"
+    query="${query} union"
+    query="${query} select ('1') as new_value"
+    query="${query}) where NOT EXISTS (select value from data where value = new_value)"
+
+    sqlite3 "$HOME/Library/Application Support/Dock/desktoppicture.db" $query
 fi
 
 # Show the status of the job
