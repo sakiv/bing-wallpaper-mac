@@ -3,45 +3,66 @@
 REPO="sakiv/bing-wallpaper-mac"
 FOLDER="$HOME/bing-wallpaper-mac"
 
-get_latest_release() {
-  curl --silent "https://api.github.com/repos/$REPO/releases/latest" | # Get latest release from GitHub api
-    grep '"tag_name":' |                                                # Get tag line
-    sed -E 's/.*"([^"]+)".*/\1/'                                        # Pluck JSON value
+__get_latest_release() {
+    echo Retriving latest release version... >&2
+    curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+        grep '"tag_name":' |                                                # Get tag line
+        sed -E 's/.*"([^"]+)".*/\1/'                                        # Pluck JSON value
 }
 
-VERSION=get_latest_release
-PACKAGE="//github.com/$REPO/releases/download/$RELEASE/bing-wallpaper-mac.tar.gz"
 USER=$(whoami)
-
 if [ -z "$1" ]; then
-    read -p "Please enter name to be used [$USER]:" USER
+    read -p "Please enter name to be used [$USER]:" IN_USER
+    USER=${IN_USER:-$USER}
+    # echo $IN_USER
+    # echo $USER
 fi
 
-JOB=com.$USER.bing-wallpaper
 if [ -z "$2" ]; then
-    read -p "Please enter target folder path [$FOLDER]:" FOLDER
+    read -p "Please enter target folder path [$FOLDER]:" IN_FOLDER
+    FOLDER=${IN_FOLDER:-$FOLDER}
+    # echo $IN_FOLDER
+    # echo $FOLDER
 fi
 
-# Create directory structure if not exists
-mkdir -p "$FOLDER"
+VERSION=$(__get_latest_release $REPO)
+echo "Deploying latest version: $VERSION"
+PACKAGE="https://github.com/$REPO/releases/download/$VERSION/bing-wallpaper-mac.tar.gz"
+JOB=com.$USER.bing-wallpaper
+
+# echo $VERSION
+# echo $PACKAGE
+# echo $JOB
+# exit 0
 
 # Extract current folder path
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-echo "Current Folder: $CWD"
-# fname="$( basename $USER )";
+# echo "Current Folder: $CWD"
+fname="$( basename $USER )";
 # echo "File name: $fname"
 
-# Command to create a tar file
-# tar --exclude-vcs -cvf bing-wallpaper-mac.tar.gz .
+# Create directory structure if not exists
+mkdir -p "$FOLDER"
+# echo $FOLDER
 
+echo "Fetching latest package - $PACKAGE"
 curl -fsSL "$PACKAGE" > "$FOLDER/bundle.tar.gz"
-tar -xzf "$FOLDER/bundle.tar.gz" "$FOLDER"
+
+# Command to create a tar file
+# tar --exclude-vcs --exclude=".DS_Store" --exclude="*.tar.gz" --exclude="install.sh" -cvf bing-wallpaper-mac.tar.gz .
+
+# echo "Deploying at $FOLDER"
+tar -xzf "$FOLDER/bundle.tar.gz" -C "$FOLDER"
 rm "$FOLDER/bundle.tar.gz"
+# echo "$FOLDER/com.yourname.bing-wallpaper.plist"
+# echo "$FOLDER/$JOB.plist"
+mv "$FOLDER/com.yourname.bing-wallpaper.plist" "$FOLDER/$JOB.plist"
 
 # Replace name in plist file
-sed -i "s/{YOUR-NAME}/$USER/g" "$FOLDER/$JOB.plist"
-sed -i "s/{TARGET-FOLDER}/$FOLDER/g" "$FOLDER/$JOB.plist"
+sed -i '' "s~{YOUR-NAME}~$USER~g" "$FOLDER/$JOB.plist"
+sed -i '' "s~{TARGET-FOLDER}~$FOLDER~g" "$FOLDER/$JOB.plist"
 
+echo "Registering with your OS..."
 # Move plist file to LaunchAgents folder
 mv "$FOLDER/$JOB.plist" "$HOME/Library/LaunchAgents"
 
@@ -49,6 +70,8 @@ mv "$FOLDER/$JOB.plist" "$HOME/Library/LaunchAgents"
 launchctl load "$HOME/Library/LaunchAgents/$JOB.plist"
 
 # Show the status of the job
-launchctl list | grep "$JOB"
+# launchctl list | grep "$JOB"
 
+echo "Successfully completed deployment"
+echo "Deployed at $FOLDER"
 exit 0
