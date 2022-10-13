@@ -67,6 +67,23 @@ You can deploy this application either using installation script (recommended) o
         -	0	com.johndoe.bing-wallpaper
 
         # If it did not register successfully then you will see empty output
+
+## Troubleshooting
+---
+Sometimes things can go wrong, we have tried to list down possible failure scenarios and how to fix them.
+
+* Application not registered with Mac OS
+    ```bash
+    Unload failed: 5: Input/output error
+    Try running `launchctl bootout` as root for richer errors.
+    
+    # Run following to verify that application is registered with Mac OS or not
+    launchctl list | grep com.johndoe.bing-wallpaper
+
+    # If you get empty response then run following command to register application
+    launchctl load ~/Library/LaunchAgents/com.johndoe.bing-wallpaper.plist
+    ```
+
 ## License
 ---
 This application is licensed under the MIT license.
