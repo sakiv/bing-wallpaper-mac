@@ -7,20 +7,36 @@ DEFAULT_USER=$(whoami)
 __get_latest_release() {
     echo Retriving latest release version... >&2
     curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
-        grep '"tag_name":' |                                                # Get tag line
-        sed -E 's/.*"([^"]+)".*/\1/'                                        # Pluck JSON value
+        grep '"tag_name":' |                                          # Get tag line
+        sed -E 's/.*"([^"]+)".*/\1/'                                  # Pluck JSON value
 }
 
-for arg; do # default for a for loop is to iterate over "$@"
-  case $arg in
-    '--debug') 
+args=($(echo "$@" | sed -e 's/=/ /g'))
+for i in "${!args[@]}"; do
+    key="${args[$i]}"
+    value="${args[$((++i))]}"
+    case $key in
+    '--debug')
         echo "Debug mode enabled"
         DEBUG=1
-        set -x 
+        set -x
         ;;
-    'user='*) USERNAME=${arg#*=} ;;
-    'folder='*) FOLDER=${arg#*=} ;;
-  esac
+    '-u' | '--user' | 'u' | 'user')
+        echo "$value"
+        USERNAME=$value
+        continue 2
+        ;;
+    '-f' | '--folder' | 'f' | 'folder')
+        echo "$value"
+        FOLDER=$value
+        continue 2
+        ;;
+    '-v' | '--version' | 'v' | 'version')
+        echo "$value"
+        VERSION=$value
+        continue 2
+        ;;
+    esac
 done
 
 if [ -z "$USERNAME" ]; then
@@ -38,9 +54,9 @@ if [ -z "$FOLDER" ]; then
 fi
 
 # Extract current folder path
-CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # echo "Current Folder: $CWD"
-fname="$( basename $USERNAME )";
+fname="$(basename $USERNAME)"
 # echo "File name: $fname"
 
 # Create directory structure if not exists
@@ -48,8 +64,12 @@ mkdir -p "$FOLDER"
 # echo $FOLDER
 
 if [ -z "$DEBUG" ]; then
-    VERSION=$(__get_latest_release $REPO)
-    echo "Deploying latest version: $VERSION"
+    if [ -z "$VERSION" ]; then
+        echo "Fetching latest version..."
+        VERSION=$(__get_latest_release $REPO)
+    fi
+
+    echo "Deploying version: $VERSION"
     PACKAGE="https://github.com/$REPO/releases/download/$VERSION/bing-wallpaper-mac.tar.gz"
     JOB=com.$USERNAME.bing-wallpaper
 
@@ -59,15 +79,15 @@ if [ -z "$DEBUG" ]; then
     # exit 0
 
     echo "Fetching latest package - $PACKAGE"
-    curl -fsSL "$PACKAGE" > "$FOLDER/bundle.tar.gz"
+    curl -fsSL "$PACKAGE" >"$FOLDER/bundle.tar.gz"
 
     # Command to create a tar file
     # tar --exclude-vcs --exclude=".DS_Store" --exclude=".github" --exclude="assets" --exclude="*.tar.gz" --exclude="install.sh" -cvf bing-wallpaper-mac.tar.gz .
 
     # echo "Deploying at $FOLDER"
     tar -xzf "$FOLDER/bundle.tar.gz" -C "$FOLDER"
-    rm "$FOLDER/bundle.tar.gz"    
-else 
+    rm "$FOLDER/bundle.tar.gz"
+else
     echo "Deploying code from local folder: [$(PWD)]"
     tar --exclude-vcs --exclude=".DS_Store" --exclude=".github" --exclude="assets" --exclude="*.tar.gz" --exclude="install.sh" -cvf bing-wallpaper-mac.tar.gz .
     tar -xzf bing-wallpaper-mac.tar.gz -C "$FOLDER"
@@ -89,8 +109,7 @@ mv "$FOLDER/$JOB.plist" "$HOME/Library/LaunchAgents"
 # Generally launchd load these jobs on login but you can load it manually
 launchctl load "$HOME/Library/LaunchAgents/$JOB.plist"
 
-if ! command -v sqlite3 &> /dev/null
-then
+if ! command -v sqlite3 &>/dev/null; then
     echo "Warning: We were not able to set Desktop Wallpaper systematically, please perform final step to complete installation - https://github.com/sakiv/bing-wallpaper-mac#set-desktop-wallpaper"
 else
     query="insert into data select * from ("

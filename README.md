@@ -14,9 +14,8 @@ You can deploy this application either using installation script (recommended) o
     ```
 
     If you get below warning, then just to troubleshooting section - [Desktop wallpaper not changing](#set-desktop-wallpaper)
-    ```bash
-    Warning: We were not able to set Desktop Wallpaper systematically, please perform final step to complete installation
-    ```
+    
+    > *Warning: We were not able to set Desktop Wallpaper systematically, please perform [final step](#set-desktop-wallpaper) to complete installation*
 
 * ### Installing manually
     *Note: You have to follow these steps in sequence. If you miss any one of these steps then application may not work as expected.* 

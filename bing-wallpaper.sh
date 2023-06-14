@@ -31,8 +31,6 @@ then
     	grep -Eo 'background-image: url\(.*\.jpg\)' | \
 		sed -e 's/background-image: url(//g' | \
 		sed -e 's/)//g' ) )
-
-        curl -sSL https://www.bing.com | grep -Eo 'background-image: url\(.*\.jpg\)' | sed -e 's/background-image: url(//g' | sed -e 's/)//g'
 fi
 
 if [ "$urls" = "" ]
