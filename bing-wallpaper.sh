@@ -9,28 +9,46 @@ mkdir -p $PICTURE_DIR
 #     grep -Eo "url:'.*?'" | \
 #     sed -e "s/url:'\([^']*\)'.*/http:\/\/bing.com\1/" | \
 #     sed -e "s/\\\//g") )
- 
+
 urls=( $(curl -sSL https://www.bing.com | \
-    grep -Eo "g_img={url:\s*\".*?\"" | \
-	sed -e "s/g_img={url:\s*\"//g" | \
-	sed -e "s/\"//g" | \
-	sed -e "s/\\\u0026/\&/g" ) )
+    grep -Eo 'g_img={url:\s*".*?"' | \
+	sed -e 's/g_img={url:\s*"//g' | \
+	sed -e 's/"//g' | \
+	sed -e 's/\\\u0026/\&/g' ) )
 
 if [ "$urls" = "" ]
 then   
 	urls=( $(curl -sSL https://www.bing.com | \
-    	grep -Eo "g_img={url:\s*\".*?\"" | \
-		sed -e "s/g_img={url:\s*\"\([^\"]*\)\".*/http:\/\/bing.com\1/" | \
-		sed -e "s/\\\//g" | \
-		sed -e "s/\\\u0026/\&/g" ) )
+    	grep -Eo 'g_img={url:\s*".*?"' | \
+		sed -e 's/g_img={url:\s*"\([^"]*\)".*/http:\/\/bing.com\1/' | \
+		sed -e 's/\\//g' | \
+		sed -e 's/\\\u0026/\&/g' ) )
 fi
 
 if [ "$urls" = "" ]
 then	
 	urls=( $(curl -sSL https://www.bing.com | \
-    	grep -Eo "background-image: url\(.*\.jpg\)" | \
-		sed -e "s/background-image: url(//g" | \
-		sed -e "s/)//g" ) )
+    	grep -Eo 'background-image: url\(.*\.jpg\)' | \
+		sed -e 's/background-image: url(//g' | \
+		sed -e 's/)//g' ) )
+
+        curl -sSL https://www.bing.com | grep -Eo 'background-image: url\(.*\.jpg\)' | sed -e 's/background-image: url(//g' | sed -e 's/)//g'
+fi
+
+if [ "$urls" = "" ]
+then 
+    urls=( $(curl -sSL https://www.bing.com | \
+        grep -Eo '<link rel="preload" href=".*&' | \
+        sed -e 's/<link rel="preload" href="//g' | \
+        sed -e 's/&.*//g' ) )
+fi
+
+if [ "$urls" = "" ]
+then 
+    urls=( $(curl -sSL https://www.bing.com | \
+        grep -Eo '<meta property="og:image" content=".*&' | \
+        sed -e 's/<meta property="og:image" content="//g' | \
+        sed -e 's/&.*//g' ) )
 fi
 
 if [ "$urls" != "" ]

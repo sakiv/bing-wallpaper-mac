@@ -10,7 +10,7 @@ You can deploy this application either using installation script (recommended) o
     You can install the script using the following command. Copy this command and paste it on your Mac terminal.
 
     ```bash
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/sakiv/bing-wallpaper-mac/dev/install.sh?`date '+%s'`)"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/sakiv/bing-wallpaper-mac/main/install.sh)"
     ```
 
     If you get below warning, then just to troubleshooting section - [Desktop wallpaper not changing](#set-desktop-wallpaper)

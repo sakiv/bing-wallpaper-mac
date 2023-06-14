@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 REPO="sakiv/bing-wallpaper-mac"
-FOLDER="$HOME/bing-wallpaper-mac"
+DEFAULT_FOLDER="$HOME/bing-wallpaper-mac"
+DEFAULT_USER=$(whoami)
 
 __get_latest_release() {
     echo Retriving latest release version... >&2
@@ -10,56 +11,75 @@ __get_latest_release() {
         sed -E 's/.*"([^"]+)".*/\1/'                                        # Pluck JSON value
 }
 
-USER=$(whoami)
-if [ -z "$1" ]; then
-    read -p "Please enter name to be used [$USER]:" IN_USER
-    USER=${IN_USER:-$USER}
+for arg; do # default for a for loop is to iterate over "$@"
+  case $arg in
+    '--debug') 
+        echo "Debug mode enabled"
+        DEBUG=1
+        set -x 
+        ;;
+    'user='*) USERNAME=${arg#*=} ;;
+    'folder='*) FOLDER=${arg#*=} ;;
+  esac
+done
+
+if [ -z "$USERNAME" ]; then
+    read -p "Please enter name to be used [$DEFAULT_USER]:" IN_USER
+    USERNAME=${IN_USER:-$DEFAULT_USER}
     # echo $IN_USER
-    # echo $USER
+    # echo $USERNAME
 fi
 
-if [ -z "$2" ]; then
-    read -p "Please enter target folder path [$FOLDER]:" IN_FOLDER
-    FOLDER=${IN_FOLDER:-$FOLDER}
+if [ -z "$FOLDER" ]; then
+    read -p "Please enter target folder path [$DEFAULT_FOLDER]:" IN_FOLDER
+    FOLDER=${IN_FOLDER:-$DEFAULT_FOLDER}
     # echo $IN_FOLDER
     # echo $FOLDER
 fi
 
-VERSION=$(__get_latest_release $REPO)
-echo "Deploying latest version: $VERSION"
-PACKAGE="https://github.com/$REPO/releases/download/$VERSION/bing-wallpaper-mac.tar.gz"
-JOB=com.$USER.bing-wallpaper
-
-# echo $VERSION
-# echo $PACKAGE
-# echo $JOB
-# exit 0
-
 # Extract current folder path
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 # echo "Current Folder: $CWD"
-fname="$( basename $USER )";
+fname="$( basename $USERNAME )";
 # echo "File name: $fname"
 
 # Create directory structure if not exists
 mkdir -p "$FOLDER"
 # echo $FOLDER
 
-echo "Fetching latest package - $PACKAGE"
-curl -fsSL "$PACKAGE" > "$FOLDER/bundle.tar.gz"
+if [ -z "$DEBUG" ]; then
+    VERSION=$(__get_latest_release $REPO)
+    echo "Deploying latest version: $VERSION"
+    PACKAGE="https://github.com/$REPO/releases/download/$VERSION/bing-wallpaper-mac.tar.gz"
+    JOB=com.$USERNAME.bing-wallpaper
 
-# Command to create a tar file
-# tar --exclude-vcs --exclude=".DS_Store" --exclude="*.tar.gz" --exclude="install.sh" -cvf bing-wallpaper-mac.tar.gz .
+    # echo $VERSION
+    # echo $PACKAGE
+    # echo $JOB
+    # exit 0
 
-# echo "Deploying at $FOLDER"
-tar -xzf "$FOLDER/bundle.tar.gz" -C "$FOLDER"
-rm "$FOLDER/bundle.tar.gz"
+    echo "Fetching latest package - $PACKAGE"
+    curl -fsSL "$PACKAGE" > "$FOLDER/bundle.tar.gz"
+
+    # Command to create a tar file
+    # tar --exclude-vcs --exclude=".DS_Store" --exclude=".github" --exclude="assets" --exclude="*.tar.gz" --exclude="install.sh" -cvf bing-wallpaper-mac.tar.gz .
+
+    # echo "Deploying at $FOLDER"
+    tar -xzf "$FOLDER/bundle.tar.gz" -C "$FOLDER"
+    rm "$FOLDER/bundle.tar.gz"    
+else 
+    echo "Deploying code from local folder: [$(PWD)]"
+    tar --exclude-vcs --exclude=".DS_Store" --exclude=".github" --exclude="assets" --exclude="*.tar.gz" --exclude="install.sh" -cvf bing-wallpaper-mac.tar.gz .
+    tar -xzf bing-wallpaper-mac.tar.gz -C "$FOLDER"
+    JOB=com.$USERNAME.bing-wallpaper
+fi
+
 # echo "$FOLDER/com.yourname.bing-wallpaper.plist"
 # echo "$FOLDER/$JOB.plist"
 mv "$FOLDER/com.yourname.bing-wallpaper.plist" "$FOLDER/$JOB.plist"
 
 # Replace name in plist file
-sed -i '' "s~{YOUR-NAME}~$USER~g" "$FOLDER/$JOB.plist"
+sed -i '' "s~{YOUR-NAME}~$USERNAME~g" "$FOLDER/$JOB.plist"
 sed -i '' "s~{TARGET-FOLDER}~$FOLDER~g" "$FOLDER/$JOB.plist"
 
 echo "Registering with your OS..."
