@@ -1,65 +1,105 @@
 #!/usr/bin/env bash
 
 REPO="sakiv/bing-wallpaper-mac"
-FOLDER="$HOME/bing-wallpaper-mac"
+DEFAULT_FOLDER="$HOME/bing-wallpaper-mac"
+DEFAULT_USER=$(whoami)
 
 __get_latest_release() {
     echo Retriving latest release version... >&2
     curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
-        grep '"tag_name":' |                                                # Get tag line
-        sed -E 's/.*"([^"]+)".*/\1/'                                        # Pluck JSON value
+        grep '"tag_name":' |                                          # Get tag line
+        sed -E 's/.*"([^"]+)".*/\1/'                                  # Pluck JSON value
 }
 
-USER=$(whoami)
-if [ -z "$1" ]; then
-    read -p "Please enter name to be used [$USER]:" IN_USER
-    USER=${IN_USER:-$USER}
+args=($(echo "$@" | sed -e 's/=/ /g'))
+for i in "${!args[@]}"; do
+    key="${args[$i]}"
+    value="${args[$((++i))]}"
+    case $key in
+    '--debug')
+        echo "Debug mode enabled"
+        DEBUG=1
+        set -x
+        ;;
+    '-u' | '--user' | 'u' | 'user')
+        echo "$value"
+        USERNAME=$value
+        continue 2
+        ;;
+    '-f' | '--folder' | 'f' | 'folder')
+        echo "$value"
+        FOLDER=$value
+        continue 2
+        ;;
+    '-v' | '--version' | 'v' | 'version')
+        echo "$value"
+        VERSION=$value
+        continue 2
+        ;;
+    esac
+done
+
+if [ -z "$USERNAME" ]; then
+    read -p "Please enter name to be used [$DEFAULT_USER]:" IN_USER
+    USERNAME=${IN_USER:-$DEFAULT_USER}
     # echo $IN_USER
-    # echo $USER
+    # echo $USERNAME
 fi
 
-if [ -z "$2" ]; then
-    read -p "Please enter target folder path [$FOLDER]:" IN_FOLDER
-    FOLDER=${IN_FOLDER:-$FOLDER}
+if [ -z "$FOLDER" ]; then
+    read -p "Please enter target folder path [$DEFAULT_FOLDER]:" IN_FOLDER
+    FOLDER=${IN_FOLDER:-$DEFAULT_FOLDER}
     # echo $IN_FOLDER
     # echo $FOLDER
 fi
 
-VERSION=$(__get_latest_release $REPO)
-echo "Deploying latest version: $VERSION"
-PACKAGE="https://github.com/$REPO/releases/download/$VERSION/bing-wallpaper-mac.tar.gz"
-JOB=com.$USER.bing-wallpaper
-
-# echo $VERSION
-# echo $PACKAGE
-# echo $JOB
-# exit 0
-
 # Extract current folder path
-CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # echo "Current Folder: $CWD"
-fname="$( basename $USER )";
+fname="$(basename $USERNAME)"
 # echo "File name: $fname"
 
 # Create directory structure if not exists
 mkdir -p "$FOLDER"
 # echo $FOLDER
 
-echo "Fetching latest package - $PACKAGE"
-curl -fsSL "$PACKAGE" > "$FOLDER/bundle.tar.gz"
+if [ -z "$DEBUG" ]; then
+    if [ -z "$VERSION" ]; then
+        echo "Fetching latest version..."
+        VERSION=$(__get_latest_release $REPO)
+    fi
 
-# Command to create a tar file
-# tar --exclude-vcs --exclude=".DS_Store" --exclude="*.tar.gz" --exclude="install.sh" -cvf bing-wallpaper-mac.tar.gz .
+    echo "Deploying version: $VERSION"
+    PACKAGE="https://github.com/$REPO/releases/download/$VERSION/bing-wallpaper-mac.tar.gz"
+    JOB=com.$USERNAME.bing-wallpaper
 
-# echo "Deploying at $FOLDER"
-tar -xzf "$FOLDER/bundle.tar.gz" -C "$FOLDER"
-rm "$FOLDER/bundle.tar.gz"
+    # echo $VERSION
+    # echo $PACKAGE
+    # echo $JOB
+    # exit 0
+
+    echo "Fetching latest package - $PACKAGE"
+    curl -fsSL "$PACKAGE" >"$FOLDER/bundle.tar.gz"
+
+    # Command to create a tar file
+    # tar --exclude-vcs --exclude=".DS_Store" --exclude=".github" --exclude="assets" --exclude="*.tar.gz" --exclude="install.sh" -cvf bing-wallpaper-mac.tar.gz .
+
+    # echo "Deploying at $FOLDER"
+    tar -xzf "$FOLDER/bundle.tar.gz" -C "$FOLDER"
+    rm "$FOLDER/bundle.tar.gz"
+else
+    echo "Deploying code from local folder: [$(PWD)]"
+    tar --exclude-vcs --exclude=".DS_Store" --exclude=".github" --exclude="assets" --exclude="*.tar.gz" --exclude="install.sh" -cvf bing-wallpaper-mac.tar.gz .
+    tar -xzf bing-wallpaper-mac.tar.gz -C "$FOLDER"
+    JOB=com.$USERNAME.bing-wallpaper
+fi
+
 # echo "$FOLDER/com.yourname.bing-wallpaper.plist"
 # echo "$FOLDER/$JOB.plist"
 mv "$FOLDER/com.yourname.bing-wallpaper.plist" "$FOLDER/$JOB.plist"
 
 # Replace name in plist file
-sed -i '' "s~{YOUR-NAME}~$USER~g" "$FOLDER/$JOB.plist"
+sed -i '' "s~{YOUR-NAME}~$USERNAME~g" "$FOLDER/$JOB.plist"
 sed -i '' "s~{TARGET-FOLDER}~$FOLDER~g" "$FOLDER/$JOB.plist"
 
 echo "Registering with your OS..."
@@ -69,8 +109,7 @@ mv "$FOLDER/$JOB.plist" "$HOME/Library/LaunchAgents"
 # Generally launchd load these jobs on login but you can load it manually
 launchctl load "$HOME/Library/LaunchAgents/$JOB.plist"
 
-if ! command -v sqlite3 &> /dev/null
-then
+if ! command -v sqlite3 &>/dev/null; then
     echo "Warning: We were not able to set Desktop Wallpaper systematically, please perform final step to complete installation - https://github.com/sakiv/bing-wallpaper-mac#set-desktop-wallpaper"
 else
     query="insert into data select * from ("
