@@ -60,7 +60,7 @@ then
     # # Remove files older than 6 days
     # find $PICTURE_DIR/*.$file_ext -type f -mtime +6 -print0 | xargs -r0 echo --
 
-    Remove all files in the directory
+    # Remove all files in the directory
     rm -Rf $PICTURE_DIR/*.*
  
     # Use this for today's Bing Wallpaper 
