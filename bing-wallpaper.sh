@@ -57,17 +57,25 @@ then
     today=$(date +%Y%m%d)
     file_ext=$(echo $urls|sed -e "s/.*\/\(.*\)/\1/"|sed -e "s/.*\.//g")
 
-    # # Remove files older than 6 days
-    # find $PICTURE_DIR/*.$file_ext -type f -mtime +6 -print0 | xargs -r0 echo --
-
+    # ##########
+    # For today
+    # ##########
     # Remove all files in the directory
-    rm -Rf $PICTURE_DIR/*.*
+    # rm -Rf $PICTURE_DIR/*.*
  
     # Use this for today's Bing Wallpaper 
-    filename="$PICTURE_DIR/bing-wallpaper.$file_ext"
+    # filename="$PICTURE_DIR/bing-wallpaper.$file_ext"
+    # ##########
+
+    # ##########
+    # For multiple days
+    # ##########
+    # # Remove files older than 6 days
+    find $PICTURE_DIR/*.$file_ext -type f -mtime +6 -print0 | xargs -r0 echo --
 
     # Use this for every days file with timestamp
-    # filename="$PICTURE_DIR/bing-wallpaper-$today.$file_ext"
+    filename="$PICTURE_DIR/bing-wallpaper-$today.$file_ext"
+    # ##########
     
     # Download the file
     echo "Downloading: $filename ..."
