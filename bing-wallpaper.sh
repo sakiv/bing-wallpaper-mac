@@ -56,7 +56,7 @@ then
  
     today=$(date +%Y%m%d)
     file_ext=$(echo $urls|sed -e "s/.*\/\(.*\)/\1/"|sed -e "s/.*\.//g")
-
+    echo "File extension: $file_ext"
     # ##########
     # For today
     # ##########
@@ -71,7 +71,7 @@ then
     # For multiple days
     # ##########
     # # Remove files older than 6 days
-    find $PICTURE_DIR/*.$file_ext -type f -mtime +6 -print0 | xargs -r0 echo --
+    find $PICTURE_DIR/*.$file_ext -type f -mtime +6 -print0 | xargs -r0 rm --
 
     # Use this for every days file with timestamp
     filename="$PICTURE_DIR/bing-wallpaper-$today.$file_ext"
