@@ -71,7 +71,11 @@ then
     # For multiple days
     # ##########
     # # Remove files older than 6 days
-    find $PICTURE_DIR/*.$file_ext -type f -mtime +6 -print0 | xargs -r0 rm --
+    FILES=$(find $PICTURE_DIR -type f -mtime +6 | wc -l)
+    echo "Files: $FILES"
+    if [[ $FILES -gt 0 ]]; then        
+        find $PICTURE_DIR \( -iname \*.$file_ext -o -iname \*.webp -o -iname \*.jpg \) -type f -mtime +6 -print0 | xargs -r0 rm --
+    fi
 
     # Use this for every days file with timestamp
     filename="$PICTURE_DIR/bing-wallpaper-$today.$file_ext"
